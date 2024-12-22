@@ -1,10 +1,6 @@
 pipeline {
     agent any
     
-    tools {
-        nodejs 'NodeJS'
-    }
-    
     environment {
         DOCKER_IMAGE = 'todo-app'
         GIT_REPO_URL = 'https://github.com/WELF9I/todo-app.git'
@@ -23,16 +19,20 @@ pipeline {
         
         stage('Install Dependencies') {
             steps {
-                sh '''
-                npm install -g pnpm
-                pnpm install
-                '''
+                nodejs(nodeJSInstallationName: 'Node20') {
+                    sh '''
+                        npm install -g pnpm
+                        pnpm install
+                    '''
+                }
             }
         }
         
         stage('Run Tests') {
             steps {
-                sh 'pnpm test'
+                nodejs(nodeJSInstallationName: 'Node20') {
+                    sh 'pnpm test'
+                }
             }
         }
         

@@ -13,7 +13,7 @@ pipeline {
                 cleanWs()
                 git branch: env.GIT_BRANCH,
                     url: env.GIT_REPO_URL,
-                    credentialsId: 'github-credentials'
+                    credentialsId: '1'
             }
         }
         

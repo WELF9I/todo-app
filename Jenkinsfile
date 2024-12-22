@@ -35,17 +35,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Install Docker') {
-            steps {
-                sh '''
-                    sudo apt-get update
-                    sudo apt-get install -y docker.io docker-compose
-                    sudo usermod -aG docker jenkins
-                    sudo systemctl start docker
-                '''
-            }
-        }
         
         stage('Build') {
             steps {

@@ -1,10 +1,5 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:20'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
     
     environment {
         DOCKER_IMAGE = 'todo-app'
@@ -38,6 +33,17 @@ pipeline {
                 nodejs(nodeJSInstallationName: 'Node20') {
                     sh 'pnpm test'
                 }
+            }
+        }
+
+        stage('Install Docker') {
+            steps {
+                sh '''
+                    sudo apt-get update
+                    sudo apt-get install -y docker.io docker-compose
+                    sudo usermod -aG docker jenkins
+                    sudo systemctl start docker
+                '''
             }
         }
         

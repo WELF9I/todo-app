@@ -1,8 +1,14 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:20-alpine'
+            args '-v /var/jenkins_home:/var/jenkins_home'
+        }
+    }
     
     environment {
         DOCKER_IMAGE = 'todo-app'
+        HOME = '/var/jenkins_home'
         GIT_REPO_URL = 'https://github.com/WELF9I/todo-app.git'
         GIT_BRANCH = 'master'
     }

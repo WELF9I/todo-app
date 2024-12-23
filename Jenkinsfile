@@ -51,7 +51,7 @@ pipeline {
             }
             steps {
                 sh '''
-                    docker-compose down
+                    docker-compose down --timeout 30
                     docker-compose up -d --build
                 '''
             }

@@ -37,14 +37,23 @@ pipeline {
         }
         
         stage('Build') {
+            options {
+                timeout(time: 10, unit: 'MINUTES')
+            }
             steps {
                 sh 'docker build -t ${DOCKER_IMAGE} .'
             }
         }
         
         stage('Deploy') {
+            options {
+                timeout(time: 10, unit: 'MINUTES')
+            }
             steps {
-                sh 'docker-compose up -d'
+                sh '''
+                    docker-compose down
+                    docker-compose up -d --build
+                '''
             }
         }
     }

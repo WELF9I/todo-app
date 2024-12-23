@@ -51,6 +51,7 @@ pipeline {
             }
             steps {
                 sh '''
+                    docker rm -f jenkins || true
                     docker-compose down --timeout 30
                     docker-compose up -d --build
                 '''

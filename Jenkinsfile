@@ -51,7 +51,7 @@ pipeline {
             }
             steps {
                 sh '''
-                    docker rm -f jenkins || true
+                    sudo chown jenkins:docker /var/run/docker.sock
                     docker-compose down --timeout 30
                     docker-compose up -d --build
                 '''

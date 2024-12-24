@@ -1,7 +1,9 @@
 version: '3.8'
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    build: 
+      context: .
+      dockerfile: jenkins.Dockerfile
     privileged: true
     user: root
     ports:
@@ -11,14 +13,7 @@ services:
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - DOCKER_HOST=unix:///var/run/docker.sock
-    command: |
-      bash -c "
-        curl -fsSL https://get.docker.com | sh &&
-        curl -L https://github.com/docker/compose/releases/download/v2.24.0/docker-compose-linux-x86_64 -o /usr/local/bin/docker-compose &&
-        chmod +x /usr/local/bin/docker-compose &&
-        jenkins-agent"
+
       
   todo-app:
     build: .

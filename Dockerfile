@@ -1,18 +1,31 @@
-FROM node:20-alpine as build
+# Base image
+FROM node:20 AS base
+
+# Set the working directory
 WORKDIR /app
 
-RUN npm install -g npm@latest pnpm
+# Install pnpm globally
+RUN npm install -g pnpm
 
+# Copy package files
 COPY package.json pnpm-lock.yaml ./
+
+# Install dependencies
 RUN pnpm install --frozen-lockfile
 
-COPY src/ ./src/
-COPY public/ ./public/
-COPY index.html vite.config.js tailwind.config.js postcss.config.js ./
+# Copy the rest of the application code
+COPY . .
 
-RUN pnpm build
+# Build the application
+RUN pnpm run build
 
-FROM nginx:alpine-slim
-COPY --from=build /app/dist /usr/share/nginx/html
+# Production image
+FROM nginx:alpine AS production
+
+# Copy built files to Nginx
+COPY --from=base /app/dist /usr/share/nginx/html
+
+# Expose port 80
 EXPOSE 80
+
 CMD ["nginx", "-g", "daemon off;"]

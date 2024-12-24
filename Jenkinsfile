@@ -1,46 +1,41 @@
 pipeline {
     agent any
     
-    environment {
-        DOCKER_PATH = tool 'docker'
-        PATH = "${DOCKER_PATH}/bin:${env.PATH}"
-    }
-    
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/WELF9I/todo-app.git'
+                git url: 'https://github.com/yourusername/todo-app.git', branch: 'master'
             }
         }
-        
-        stage('Build') {
+        stage('Install Dependencies') {
             steps {
-                sh '''
-                    cd todo-app
-                    docker build -t my-react-app .
-                '''
+                script {
+                    // Install pnpm globally if not already installed
+                    sh 'npm install -g pnpm'
+                    // Install project dependencies
+                    sh 'pnpm install'
+                }
             }
         }
-        
-        stage('Deploy') {
+        stage('Build Application') {
             steps {
-                sh 'docker-compose up -d'
+                sh 'pnpm run build'  // Build the app using Vite
             }
         }
-        
-        stage('Test') {
+        stage('Deploy with Docker Compose') {
             steps {
-                sh '''
-                    cd todo-app
-                    docker exec $(docker ps -qf "name=todo-app") pnpm test
-                '''
+                script {
+                    // Run docker-compose to build and start containers
+                    sh 'docker-compose up --build -d'
+                }
             }
         }
     }
 
     post {
         always {
-            cleanWs()
+            // Clean up after build (optional)
+            sh 'docker-compose down'
         }
     }
 }

@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  todo-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"  # Map host port 3000 to container port 80
+    volumes:
+      - .:/app  # Bind mount for development (optional)
+    environment:
+      - NODE_ENV=production
+  
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"  # Jenkins UI port
+      - "50000:50000"  # Jenkins agent port
+    volumes:
+      - jenkins_home:/var/jenkins_home  # Persistent storage for Jenkins data
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false  # Disable setup wizard for automation
+
+volumes:
+  jenkins_home:

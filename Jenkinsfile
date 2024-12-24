@@ -2,48 +2,58 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_COMPOSE = 'docker-compose'
-        NODE_VERSION = '20.x'
+        DOCKER_IMAGE = 'todo-app'
+        GIT_REPO_URL = 'https://github.com/WELF9I/todo-app.git'
+        GIT_BRANCH = 'master'
     }
     
     stages {
         stage('Checkout') {
             steps {
-                git url: 'https://github.com/WELF9I/todo-app.git', 
-                    branch: 'master'
+                cleanWs()
+                git branch: env.GIT_BRANCH,
+                    url: env.GIT_REPO_URL,
+                    credentialsId: '1'
             }
         }
         
-        stage('Setup Node') {
+        stage('Install Dependencies') {
             steps {
-                nodejs(nodeJSInstallationName: NODE_VERSION) {
-                    sh 'npm install -g pnpm'
+                nodejs(nodeJSInstallationName: 'Node20') {
+                    sh '''
+                        npm install -g pnpm
+                        pnpm install
+                    '''
                 }
             }
         }
         
-        stage('Install') {
+        stage('Run Tests') {
             steps {
-                nodejs(nodeJSInstallationName: NODE_VERSION) {
-                    sh 'pnpm install'
+                nodejs(nodeJSInstallationName: 'Node20') {
+                    sh 'pnpm test'
                 }
             }
         }
         
         stage('Build') {
+            options {
+                timeout(time: 10, unit: 'MINUTES')
+            }
             steps {
-                nodejs(nodeJSInstallationName: NODE_VERSION) {
-                    sh 'pnpm build'
-                }
+                sh 'docker build -t ${DOCKER_IMAGE} .'
             }
         }
         
         stage('Deploy') {
+            options {
+                timeout(time: 10, unit: 'MINUTES')
+            }
             steps {
                 sh '''
-                    ${DOCKER_COMPOSE} down || true
-                    ${DOCKER_COMPOSE} build
-                    ${DOCKER_COMPOSE} up -d
+                    docker rm -f jenkins || true
+                    docker-compose down --timeout 30
+                    docker-compose up -d --build
                 '''
             }
         }

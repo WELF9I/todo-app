@@ -1,26 +1,26 @@
 version: '3.8'
+
 services:
   todo-app:
-    build: .
+    build:
+      context: ./todo-app
+      dockerfile: Dockerfile
     ports:
       - "80:80"
-    volumes:
-      - ./src:/app/src
-    environment:
-      - NODE_ENV=production
-  
+    depends_on:
+      - jenkins
+
   jenkins:
     image: jenkins/jenkins:lts
     privileged: true
     user: root
     ports:
       - "8080:8080"
-      - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
-      - JENKINS_OPTS="--prefix=/jenkins"
-
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    
 volumes:
   jenkins_home:

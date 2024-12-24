@@ -51,8 +51,10 @@ pipeline {
             }
             steps {
                 sh '''
-                    sudo chown jenkins:docker /var/run/docker.sock
-                    docker-compose down --timeout 30
+                    whoami
+                    id
+                    ls -la /var/run/docker.sock
+                    docker-compose down --timeout 30 || true
                     docker-compose up -d --build
                 '''
             }

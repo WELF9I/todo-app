@@ -1,6 +1,11 @@
-node_modules
-npm-debug.log
-Dockerfile*
-docker-compose.yml
-*.env
+node_modules/
 dist/
+.env
+.env.*
+*.log
+.git/
+.gitignore
+README.md
+.vscode/
+coverage/
+*.test.*

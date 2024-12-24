@@ -1,6 +1,11 @@
 pipeline {
     agent any
     
+    environment {
+        DOCKER_PATH = tool 'docker'
+        PATH = "${DOCKER_PATH}/bin:${env.PATH}"
+    }
+    
     stages {
         stage('Clone Repository') {
             steps {
@@ -10,9 +15,10 @@ pipeline {
         
         stage('Build') {
             steps {
-                dir('todo-app') {
-                    sh 'docker build -t my-react-app .'
-                }
+                sh '''
+                    cd todo-app
+                    docker build -t my-react-app .
+                '''
             }
         }
         
@@ -24,7 +30,10 @@ pipeline {
         
         stage('Test') {
             steps {
-                sh 'pnpm test'
+                sh '''
+                    cd todo-app
+                    docker exec $(docker ps -qf "name=todo-app") pnpm test
+                '''
             }
         }
     }

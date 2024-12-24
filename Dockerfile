@@ -1,32 +1,12 @@
-# Use Node.js LTS version as the base image
-FROM node:18 AS builder
-
-# Set the working directory
-WORKDIR /app
-
-# Copy package.json and pnpm-lock.yaml
-COPY package.json pnpm-lock.yaml ./
-
-# Install pnpm globally
+FROM node:20-slim as base
 RUN npm install -g pnpm
-
-# Install dependencies
+WORKDIR /app
+COPY package.json pnpm-lock.yaml ./
 RUN pnpm install
-
-# Copy the rest of the application code
 COPY . .
+RUN pnpm build
 
-# Build the app using Vite
-RUN pnpm run build
-
-# Production image
 FROM nginx:alpine
-
-# Copy built files from the builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Expose port 80
+COPY --from=base /app/dist /usr/share/nginx/html
 EXPOSE 80
-
-# Start Nginx server
 CMD ["nginx", "-g", "daemon off;"]

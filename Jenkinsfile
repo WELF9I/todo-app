@@ -1,41 +1,57 @@
 pipeline {
     agent any
     
+    environment {
+        DOCKER_COMPOSE = 'docker-compose'
+        NODE_VERSION = '20.x'
+    }
+    
     stages {
-        stage('Clone Repository') {
+        stage('Checkout') {
             steps {
-                git url: 'https://github.com/yourusername/todo-app.git', branch: 'master'
+                git url: 'https://github.com/WELF9I/todo-app.git', 
+                    branch: 'master'
             }
         }
-        stage('Install Dependencies') {
+        
+        stage('Setup Node') {
             steps {
-                script {
-                    // Install pnpm globally if not already installed
+                nodejs(nodeJSInstallationName: NODE_VERSION) {
                     sh 'npm install -g pnpm'
-                    // Install project dependencies
+                }
+            }
+        }
+        
+        stage('Install') {
+            steps {
+                nodejs(nodeJSInstallationName: NODE_VERSION) {
                     sh 'pnpm install'
                 }
             }
         }
-        stage('Build Application') {
+        
+        stage('Build') {
             steps {
-                sh 'pnpm run build'  // Build the app using Vite
-            }
-        }
-        stage('Deploy with Docker Compose') {
-            steps {
-                script {
-                    // Run docker-compose to build and start containers
-                    sh 'docker-compose up --build -d'
+                nodejs(nodeJSInstallationName: NODE_VERSION) {
+                    sh 'pnpm build'
                 }
             }
         }
+        
+        stage('Deploy') {
+            steps {
+                sh '''
+                    ${DOCKER_COMPOSE} down || true
+                    ${DOCKER_COMPOSE} build
+                    ${DOCKER_COMPOSE} up -d
+                '''
+            }
+        }
     }
-
+    
     post {
         always {
-            // Clean up after build (optional)
-            sh 'docker-compose down'
+            cleanWs()
         }
     }
 }
